@@ -18,8 +18,7 @@ class Buffer
     }
 
     public void writeString(String s)
-    {
-
+    {        
         try {
             baos.write(s.getBytes("US-ASCII"));
         } catch (IOException e) {
@@ -31,8 +30,16 @@ class Buffer
     {
         for (int b : bytes) {
             assert(b < 0x100);
-            baos.write((byte)b);
+            baos.write(b);
         }
+    }
+
+    public void writeBytes(byte... bytes)
+    {
+        for (byte b : bytes) {
+            baos.write(b);
+        }
+        
     }
 
 
