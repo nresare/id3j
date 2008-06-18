@@ -8,6 +8,8 @@ import java.io.UnsupportedEncodingException;
 public class ID3Serializer
 {
     private boolean alwaysEndWithNull = false;
+    // this flag adds padding like the 'id3v2' tool. (Up to 1544 bytes)
+    private boolean pad = false;
 
     public byte[] serialize(ID3Tag tag)
        {
@@ -17,8 +19,15 @@ public class ID3Serializer
            // we write zero length for now, length field will be updated later
            b.writeZeroes(6);
            writeText(b, "TPE1", tag.getArtist());
+           writeText(b, "TIT2", tag.getTitle());
            writeText(b, "TALB", tag.getAlbum());
            writeText(b, "TRCK", tag.getTrack());
+           if (pad) {
+               int toPad  = 1544 - b.getSize();
+               if (toPad > 0) {
+                   b.writeZeroes(toPad);
+               }
+           }
 
            byte[] bs = b.getBytes();
            writeTagSize(bs);
@@ -95,5 +104,10 @@ public class ID3Serializer
     public void setAlwaysEndWithNull(boolean alwaysEndWithNull)
     {
         this.alwaysEndWithNull = alwaysEndWithNull;
+    }
+
+    public void setPad(boolean pad)
+    {
+        this.pad = pad;
     }
 }

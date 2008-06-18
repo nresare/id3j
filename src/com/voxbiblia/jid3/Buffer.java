@@ -58,6 +58,11 @@ class Buffer
 
     }
 
+    public int getSize()
+    {
+        return baos.toByteArray().length;
+    }
+
     public byte[] getBytes()
     {
         return baos.toByteArray();

@@ -2,10 +2,8 @@ package com.voxbiblia.jid3;
 
 import junit.framework.TestCase;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Tests ID3Serializer
@@ -28,9 +26,19 @@ public class ID3SerializerTest
         t.setAlbum("Yngve ”steen“ Nilsson");
         t.setTrack("8");
         ID3Serializer s = new ID3Serializer();
+        // to test iTunes null everywhere compatibility
         s.setAlwaysEndWithNull(true);
         cmp(readFile("test/data/tag1.bin"), s.serialize(t));
+    }
 
+    public void testSerialize2()
+    {
+        ID3Tag t = new ID3Tag();
+        t.setArtist("greger");
+        t.setTitle("stolpe");
+        ID3Serializer s = new ID3Serializer();
+        s.setPad(true);
+        cmp(readFile("test/data/tag2.bin.gz"), s.serialize(t));
     }
 
     public void testNeedsUnicode()
@@ -53,6 +61,19 @@ public class ID3SerializerTest
     {
         try {
             File f = new File(filename);
+            if (filename.endsWith(".gz")) {
+                FileInputStream fis = new FileInputStream(filename);
+                GZIPInputStream zis = new GZIPInputStream(fis);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int read = zis.read(buffer);
+                while (read > 0) {
+                    baos.write(buffer, 0, read);
+                    read = zis.read(buffer);
+                }
+                fis.close();
+                return baos.toByteArray();
+            }
             FileInputStream fis = new FileInputStream(f);
             int len = (int)f.length();
             byte[] bs = new byte[(int)f.length()];
