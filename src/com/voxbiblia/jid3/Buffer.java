@@ -10,33 +10,31 @@ class Buffer
 {
     private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
+    /**
+     * Writes a number of zero bytes to the buffer
+     *
+     * @param count the number of zero bytes to write
+     */
     public void writeZeroes(int count)
     {
         for (int i = 0; i < count; i++) {
-            baos.write((byte)0);
+            baos.write(0);
         }
     }
 
-    public void writeString(String s, boolean bugCompatibleNewlines)
+    /**
+     * Writes the given string to the byte buffer in the ISO-8859-1
+     * character encoding.
+     *
+     * @param s the string to write
+     */
+    public void writeString(String s)
     {
         try {
-            byte[] b = s.getBytes("ISO-8859-1");
-            if (bugCompatibleNewlines) {
-                for (int i = 0; i < b.length; i++) {
-                    if (b[i] == 0x0a) {
-                        b[i] = 0x0d;
-                    }
-                }
-            }
-            baos.write(b);
+            baos.write(s.getBytes("ISO-8859-1"));
         } catch (IOException e) {
             throw new Error(e);
         }
-    }
-
-    public void writeString(String s)
-    {
-        writeString(s, false);
     }
 
     public void writeBytes(int... bytes)

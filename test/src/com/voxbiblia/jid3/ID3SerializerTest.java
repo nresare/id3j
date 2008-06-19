@@ -26,8 +26,6 @@ public class ID3SerializerTest
         t.setAlbum("Yngve ”steen“ Nilsson");
         t.setTrack("8");
         ID3Serializer s = new ID3Serializer();
-        // to test iTunes null everywhere compatibility
-        s.setAlwaysEndWithNull(true);
         cmp(readFile("test/data/tag1.bin"), s.serialize(t));
     }
 
@@ -37,7 +35,7 @@ public class ID3SerializerTest
         t.setArtist("greger");
         t.setTitle("stolpe");
         ID3Serializer s = new ID3Serializer();
-        s.setPad(true);
+        s.setPadCount(1500);
         cmp(readFile("test/data/tag2.bin.gz"), s.serialize(t));
     }
 
@@ -54,6 +52,23 @@ public class ID3SerializerTest
         t.setLyrics(readTextFile("test/data/lyrics.txt"));
         ID3Serializer s = new ID3Serializer();
         cmp(readFile("test/data/tag3.bin"), s.serialize(t));
+    }
+
+    public void testSerializeUnicodeLyrics()
+    {
+        ID3Tag t = new ID3Tag();
+        t.setArtist("Bibel 2000");
+        t.setAlbum("40 Matteusevangeliet");
+        t.setTrack("1/28");
+        t.setTitle("Matt 01 Jesu släkttavla, Jesu födelse");
+            t.setGenre("Nya Testamentet");
+        t.setComment("www.voxbiblia.se\nInläsare: Mats Sundman");
+        t.setLyrics("€299");
+        ID3Serializer s = new ID3Serializer();
+        cmp(readFile("test/data/tag4.bin"), s.serialize(t));
+
+
+
     }
 
     public void testNeedsUnicode()
@@ -136,7 +151,7 @@ public class ID3SerializerTest
             if (a[i] != b[i] ) {
                 write(a, "reference.out");
                 write(b, "candidate.out");
-                fail("mismatch at byte "+ i);
+                fail("mismatch at byte 0x"+ Integer.toHexString(i));
             }
         }
     }

@@ -7,9 +7,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class ID3Serializer
 {
-    private boolean alwaysEndWithNull = false;
-    // this flag adds padding like the 'id3v2' tool. (Up to 1544 bytes)
-    private boolean pad = false;
+    private int padCount = 0;
 
     public byte[] serialize(ID3Tag tag)
     {
@@ -25,13 +23,9 @@ public class ID3Serializer
         writeText(b, "TPE1", tag.getArtist());
         writeText(b, "TIT2", tag.getTitle());
         writeTextLang(b, "USLT", "eng", tag.getLyrics());
-        b.writeZeroes(0x6e);
 
-        if (pad) {
-            int toPad = 1544 - b.getSize();
-            if (toPad > 0) {
-                b.writeZeroes(toPad);
-            }
+        if (padCount > 0) {
+            b.writeZeroes(padCount);
         }
 
         byte[] bs = b.getBytes();
@@ -75,11 +69,29 @@ public class ID3Serializer
         bs[9] = (byte)(size & 0x7f);
     }
 
+    /**
+     * Writes a regular "Text information frame" (ID3v2.3.0 4.2.1) with the
+     * specified frame id to the buffer
+     *
+     * @param b the buffer to append the frame data to
+     * @param frameId the four letter ID of the frame
+     * @param value the text value
+     */
     void writeText(Buffer b, String frameId, String value)
     {
         writeTextLang(b, frameId, null, value);
     }
 
+    /**
+     * Writes a text frame with language code (the format specified for frames
+     * USLT and COMM). If lang is null, a regular text frame without the
+     * language tag and "short content description" (See ID3v2.3.0 4.11)
+     *
+     * @param b the buffer to append the frame data to
+     * @param frameId the four letter frame ID
+     * @param lang the language tag
+     * @param value the text value
+     */
     void writeTextLang(Buffer b, String frameId, String lang, String value)
     {
         if (value == null || value.length() == 0) {
@@ -88,20 +100,19 @@ public class ID3Serializer
         assert (frameId.length() == 4);
         b.writeString(frameId);
         if (needsUnicode(value)) {
-            int len = (value.length() * 2) + 3;
-            if (alwaysEndWithNull) {
-                len += 2;
-            }
+            // two bytes per char + bom (2) + flags (2) + encoding indicator (1)
+            int len = (value.length() * 2) + 5;
             if (lang != null) {
                 assert(lang.length() == 3);
-                len += 4;
+                // lang (3) + bom (2) + null (2)
+                len += 7;
             }
             b.writeUInt32BE(len);
             // frame flags and string encoding
             b.writeBytes(0x00, 0x00, 0x01);
             if (lang != null) {
                 b.writeString(lang);
-                b.writeZeroes(1);
+                b.writeBytes(0xff, 0xfe, 0x00, 0x00);
             }
             // Byte Order Mark for Little Endian UTF-16
             b.writeBytes(0xff, 0xfe);
@@ -112,14 +123,8 @@ public class ID3Serializer
                 throw new Error("Your platform doesn't support UTF-16LE");
             }
             b.writeBytes(bs);
-            if (alwaysEndWithNull) {
-                b.writeZeroes(2);
-            }
         } else {
             int len = value.length() + 1;
-            if (alwaysEndWithNull) {
-                len++;
-            }
             if (lang != null) {
                 assert(lang.length() == 3);
                 len += 4;
@@ -131,14 +136,7 @@ public class ID3Serializer
                 b.writeString(lang);
                 b.writeZeroes(1);
             }
-            if (frameId.equals("USLT")) {
-                b.writeString(value, true);
-            } else {
-                b.writeString(value);
-            }
-            if (alwaysEndWithNull) {
-                b.writeZeroes(1);
-            }
+            b.writeString(value);
         }
     }
 
@@ -153,13 +151,14 @@ public class ID3Serializer
     }
 
 
-    public void setAlwaysEndWithNull(boolean alwaysEndWithNull)
+    /**
+     * Configures this serializer to add <tt>padCount</tt> null bytes at the
+     * end of the tag.
+     *
+     * @param padCount the number of padding bytes to add to written tags
+     */
+    public void setPadCount(int padCount)
     {
-        this.alwaysEndWithNull = alwaysEndWithNull;
-    }
-
-    public void setPad(boolean pad)
-    {
-        this.pad = pad;
+        this.padCount = padCount;
     }
 }
