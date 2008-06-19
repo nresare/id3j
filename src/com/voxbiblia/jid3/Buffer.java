@@ -17,13 +17,26 @@ class Buffer
         }
     }
 
-    public void writeString(String s)
-    {        
+    public void writeString(String s, boolean bugCompatibleNewlines)
+    {
         try {
-            baos.write(s.getBytes("US-ASCII"));
+            byte[] b = s.getBytes("ISO-8859-1");
+            if (bugCompatibleNewlines) {
+                for (int i = 0; i < b.length; i++) {
+                    if (b[i] == 0x0a) {
+                        b[i] = 0x0d;
+                    }
+                }
+            }
+            baos.write(b);
         } catch (IOException e) {
             throw new Error(e);
         }
+    }
+
+    public void writeString(String s)
+    {
+        writeString(s, false);
     }
 
     public void writeBytes(int... bytes)

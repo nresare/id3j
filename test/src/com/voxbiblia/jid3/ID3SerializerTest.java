@@ -50,6 +50,8 @@ public class ID3SerializerTest
         t.setPicture(readFile("test/data/mt.png"));
         t.setTitle("Matt 01 Jesu släkttavla, Jesu födelse");
         t.setGenre("Nya Testamentet");
+        t.setComment("www.voxbiblia.se\nInläsare: Mats Sundman");
+        t.setLyrics(readTextFile("test/data/lyrics.txt"));
         ID3Serializer s = new ID3Serializer();
         cmp(readFile("test/data/tag3.bin"), s.serialize(t));
     }
@@ -68,6 +70,25 @@ public class ID3SerializerTest
         assertEquals(0, b[7]);
         assertEquals(0x02, b[8]);
         assertEquals(0x01, b[9]);
+    }
+
+    private String readTextFile(String filename)
+    {
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            Reader fr = new InputStreamReader(fis, "UTF-8");
+            CharArrayWriter w = new CharArrayWriter();
+            char[] buf = new char[8192];
+            int read = fr.read(buf);
+            while (read > 0 ) {
+                w.write(buf, 0, read);
+                read = fr.read(buf);
+            }
+            fis.close();
+            return w.toString();
+        }   catch (IOException e) {
+            throw new Error(e);
+        }
     }
 
     private byte[] readFile(String filename)

@@ -20,9 +20,12 @@ public class ID3Serializer
         b.writeZeroes(6);
         writeText(b, "TRCK", tag.getTrack());
         writePicture(b, tag.getPicture());
+        writeText(b, "TALB", tag.getAlbum());
+        writeTextLang(b, "COMM", "eng", tag.getComment());
         writeText(b, "TPE1", tag.getArtist());
         writeText(b, "TIT2", tag.getTitle());
-        writeText(b, "TALB", tag.getAlbum());
+        writeTextLang(b, "USLT", "eng", tag.getLyrics());
+        b.writeZeroes(0x6e);
 
         if (pad) {
             int toPad = 1544 - b.getSize();
@@ -36,13 +39,15 @@ public class ID3Serializer
         return bs;
     }
 
+
     private static final String CONTENT_TYPE = "image/jpeg";
     private static final int IMAGE_TYPE = 0x03;
 
     private void writePicture(Buffer b, byte[] picture)
     {
-
-
+        if (picture == null) {
+            return;
+        }
         b.writeString("APIC");
         int size = picture.length + CONTENT_TYPE.length() + 4;
         b.writeUInt32BE(size);
@@ -72,6 +77,11 @@ public class ID3Serializer
 
     void writeText(Buffer b, String frameId, String value)
     {
+        writeTextLang(b, frameId, null, value);
+    }
+
+    void writeTextLang(Buffer b, String frameId, String lang, String value)
+    {
         if (value == null || value.length() == 0) {
             return;
         }
@@ -82,8 +92,19 @@ public class ID3Serializer
             if (alwaysEndWithNull) {
                 len += 2;
             }
+            if (lang != null) {
+                assert(lang.length() == 3);
+                len += 4;
+            }
             b.writeUInt32BE(len);
-            b.writeBytes(0x00, 0x00, 0x01, 0xff, 0xfe);
+            // frame flags and string encoding
+            b.writeBytes(0x00, 0x00, 0x01);
+            if (lang != null) {
+                b.writeString(lang);
+                b.writeZeroes(1);
+            }
+            // Byte Order Mark for Little Endian UTF-16
+            b.writeBytes(0xff, 0xfe);
             byte[] bs;
             try {
                 bs = value.getBytes("UTF-16LE");
@@ -99,9 +120,22 @@ public class ID3Serializer
             if (alwaysEndWithNull) {
                 len++;
             }
+            if (lang != null) {
+                assert(lang.length() == 3);
+                len += 4;
+            }
             b.writeUInt32BE(len);
+            // frame flags and string encoding
             b.writeZeroes(3);
-            b.writeString(value);
+            if (lang != null) {
+                b.writeString(lang);
+                b.writeZeroes(1);
+            }
+            if (frameId.equals("USLT")) {
+                b.writeString(value, true);
+            } else {
+                b.writeString(value);
+            }
             if (alwaysEndWithNull) {
                 b.writeZeroes(1);
             }
