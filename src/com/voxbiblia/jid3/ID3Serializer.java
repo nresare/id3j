@@ -34,7 +34,7 @@ public class ID3Serializer
     }
 
 
-    private static final String CONTENT_TYPE = "image/jpeg";
+    private static final String DEFAULT_CONTENT_TYPE = "image/jpeg";
     private static final int IMAGE_TYPE = 0x03;
 
     private void writePicture(Buffer b, byte[] picture)
@@ -42,11 +42,17 @@ public class ID3Serializer
         if (picture == null) {
             return;
         }
+
+        String ct = DEFAULT_CONTENT_TYPE;
+        if (picture[1] == 'P' &&  picture[2] == 'N' && picture[3] == 'G') {
+            ct = "image/png";
+        }
+
         b.writeString("APIC");
-        int size = picture.length + CONTENT_TYPE.length() + 4;
+        int size = picture.length + ct.length() + 4;
         b.writeUInt32BE(size);
         b.writeZeroes(3);
-        b.writeString(CONTENT_TYPE);
+        b.writeString(ct);
         b.writeBytes(0x00, IMAGE_TYPE, 0x00);
         b.writeBytes(picture);
     }
