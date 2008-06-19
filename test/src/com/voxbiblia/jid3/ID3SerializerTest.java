@@ -41,6 +41,19 @@ public class ID3SerializerTest
         cmp(readFile("test/data/tag2.bin.gz"), s.serialize(t));
     }
 
+    public void testSerialize3()
+    {
+        ID3Tag t = new ID3Tag();
+        t.setArtist("Bibel 2000");
+        t.setAlbum("40 Matteusevangeliet");
+        t.setTrack("1/28");
+        t.setPicture(readFile("test/data/mt.png"));
+        t.setTitle("Matt 01 Jesu släkttavla, Jesu födelse");
+        t.setGenre("Nya Testamentet");
+        ID3Serializer s = new ID3Serializer();
+        cmp(readFile("test/data/tag3.bin"), s.serialize(t));
+    }
+
     public void testNeedsUnicode()
     {
         assertTrue(ID3Serializer.needsUnicode("€100"));

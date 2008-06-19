@@ -12,93 +12,111 @@ public class ID3Serializer
     private boolean pad = false;
 
     public byte[] serialize(ID3Tag tag)
-       {
-           Buffer b = new Buffer();
-           b.writeString("ID3");
-           b.writeBytes(0x03);
-           // we write zero length for now, length field will be updated later
-           b.writeZeroes(6);
-           writeText(b, "TPE1", tag.getArtist());
-           writeText(b, "TIT2", tag.getTitle());
-           writeText(b, "TALB", tag.getAlbum());
-           writeText(b, "TRCK", tag.getTrack());
-           if (pad) {
-               int toPad  = 1544 - b.getSize();
-               if (toPad > 0) {
-                   b.writeZeroes(toPad);
-               }
-           }
+    {
+        Buffer b = new Buffer();
+        b.writeString("ID3");
+        b.writeBytes(0x03);
+        // we write zero length for now, length field will be updated later
+        b.writeZeroes(6);
+        writeText(b, "TRCK", tag.getTrack());
+        writePicture(b, tag.getPicture());
+        writeText(b, "TPE1", tag.getArtist());
+        writeText(b, "TIT2", tag.getTitle());
+        writeText(b, "TALB", tag.getAlbum());
 
-           byte[] bs = b.getBytes();
-           writeTagSize(bs);
-           return bs;
-       }
+        if (pad) {
+            int toPad = 1544 - b.getSize();
+            if (toPad > 0) {
+                b.writeZeroes(toPad);
+            }
+        }
 
-       /**
-        * Writes the size of the tag minus header (10 bytes) into 4 bytes
-        * at offset 6 using using only the 7 lower bits in each byte.
-        *
-        * @param bs the buffer.
-        */
-       static void writeTagSize(byte[] bs)
-       {
-           int size = bs.length - 10;
-           if (size > (1 << 28)) {
-               throw new Error("tag is larger than 2**28, too big: "+ size);
-           }
-           bs[6] = (byte)((size >> 21) & 0x7f);
-           bs[7] = (byte)((size >> 14) & 0x7f);
-           bs[8] = (byte)((size >> 7) & 0x7f);
-           bs[9] = (byte)(size & 0x7f);
-       }
+        byte[] bs = b.getBytes();
+        writeTagSize(bs);
+        return bs;
+    }
 
-       void writeText(Buffer b, String frameId, String value)
-       {
-           if (value == null || value.length() == 0) {
-               return;
-           }
-           assert(frameId.length() == 4);
-           b.writeString(frameId);
-           if (needsUnicode(value)) {
-               int len = (value.length() * 2) + 3;
-               if (alwaysEndWithNull) {
-                   len += 2;
-               }
-               b.writeUInt32BE(len);
-               b.writeBytes(0x00,0x00,0x01,0xff,0xfe);
-               byte[] bs;
-               try {
-                   bs = value.getBytes("UTF-16LE");
-               } catch (UnsupportedEncodingException e) {
-                   throw new Error("Your platform doesn't support UTF-16LE");
-               }
-               b.writeBytes(bs);
-               if (alwaysEndWithNull) {
-                   b.writeZeroes(2);
-               }
-           } else {
-               int len = value.length() + 1;
-               if (alwaysEndWithNull) {
-                   len++;
-               }
-               b.writeUInt32BE(len);
-               b.writeZeroes(3);
-               b.writeString(value);
-               if (alwaysEndWithNull) {
-                   b.writeZeroes(1);
-               }
-           }
-       }
+    private static final String CONTENT_TYPE = "image/jpeg";
+    private static final int IMAGE_TYPE = 0x03;
 
-       static boolean needsUnicode(String s)
-       {
-           for (char c : s.toCharArray()) {
-               if (c > 0xff) {
-                   return true;
-               }
-           }
-           return false;
-       }
+    private void writePicture(Buffer b, byte[] picture)
+    {
+
+
+        b.writeString("APIC");
+        int size = picture.length + CONTENT_TYPE.length() + 4;
+        b.writeUInt32BE(size);
+        b.writeZeroes(3);
+        b.writeString(CONTENT_TYPE);
+        b.writeBytes(0x00, IMAGE_TYPE, 0x00);
+        b.writeBytes(picture);
+    }
+
+    /**
+     * Writes the size of the tag minus header (10 bytes) into 4 bytes
+     * at offset 6 using using only the 7 lower bits in each byte.
+     *
+     * @param bs the buffer.
+     */
+    static void writeTagSize(byte[] bs)
+    {
+        int size = bs.length - 10;
+        if (size > (1 << 28)) {
+            throw new Error("tag is larger than 2**28, too big: "+ size);
+        }
+        bs[6] = (byte)((size >> 21) & 0x7f);
+        bs[7] = (byte)((size >> 14) & 0x7f);
+        bs[8] = (byte)((size >> 7) & 0x7f);
+        bs[9] = (byte)(size & 0x7f);
+    }
+
+    void writeText(Buffer b, String frameId, String value)
+    {
+        if (value == null || value.length() == 0) {
+            return;
+        }
+        assert (frameId.length() == 4);
+        b.writeString(frameId);
+        if (needsUnicode(value)) {
+            int len = (value.length() * 2) + 3;
+            if (alwaysEndWithNull) {
+                len += 2;
+            }
+            b.writeUInt32BE(len);
+            b.writeBytes(0x00, 0x00, 0x01, 0xff, 0xfe);
+            byte[] bs;
+            try {
+                bs = value.getBytes("UTF-16LE");
+            } catch (UnsupportedEncodingException e) {
+                throw new Error("Your platform doesn't support UTF-16LE");
+            }
+            b.writeBytes(bs);
+            if (alwaysEndWithNull) {
+                b.writeZeroes(2);
+            }
+        } else {
+            int len = value.length() + 1;
+            if (alwaysEndWithNull) {
+                len++;
+            }
+            b.writeUInt32BE(len);
+            b.writeZeroes(3);
+            b.writeString(value);
+            if (alwaysEndWithNull) {
+                b.writeZeroes(1);
+            }
+        }
+    }
+
+    static boolean needsUnicode(String s)
+    {
+        for (char c : s.toCharArray()) {
+            if (c > 0xff) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     public void setAlwaysEndWithNull(boolean alwaysEndWithNull)
