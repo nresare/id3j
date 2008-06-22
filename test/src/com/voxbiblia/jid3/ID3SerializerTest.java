@@ -103,6 +103,13 @@ public class ID3SerializerTest
         assertEquals(0x01, b[9]);
     }
 
+    public void testReadUInt32BE()
+    {
+        byte[] bs = new byte[] {(byte)0x00, (byte)0x00, (byte)0xfe, (byte)0xd8};
+        assertEquals(65240, ID3Serializer.readUInt32BE(bs, 0));
+    }
+
+
     private String readTextFile(String filename)
     {
         try {

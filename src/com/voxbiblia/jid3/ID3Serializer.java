@@ -82,7 +82,7 @@ public class ID3Serializer
 
     private void copyFrame(Buffer b, byte[] previous, int offset)
     {
-        int len = readInt32BE(previous, offset + 4);
+        int len = readUInt32BE(previous, offset + 4);
         if (previous.length < offset + len + 10) {
             throw new Error(String.format("buffer length (0x%x bytes) is " +
                     "shorter than 0x%x",previous.length, (offset + len + 10)));
@@ -106,25 +106,57 @@ public class ID3Serializer
         for (int i = 10; i < tag.length;) {
             String id;
             try {
+                if (i < 0) {
+                    throw new Error("meep");
+                }
                 id = new String(tag, i, 4, "US-ASCII");
             } catch (UnsupportedEncodingException e) {
                 throw new Error(e);
             }
             m.put(id, i);
             i += 4;
-            i += readInt32BE(tag, i) + 6;
+            i += readUInt32BE(tag, i) + 6;
         }
         return m;
     }
 
-    private static int readInt32BE(byte[] tag, int i)
+    /**
+     *
+     * Reads an unsigned big endian 32 bit integer and returns it. Since
+     * the java int is signed, it can't handles values higher than 2**31.
+     * Providing such values will result in an IllegalArgumentException.
+     *
+     * @param in the InputStream to read four bytes from.
+     * @param offset the offset into the byte buffer to read the int at
+     * @return the integer
+     * @throws IllegalArgumentException if the given int is larger than 2**31.
+     */
+    static int readUInt32BE(byte[] in, int offset)
+            throws IllegalArgumentException
     {
-        int val = tag[i++] << 24;
-        val += tag[i++] << 16;
-        val += tag[i++] << 8;
-        val += tag[i];
-        return val;
+        if (in.length < offset + 4) {
+            throw new IllegalArgumentException(String.format("can't read from in with size %d offset %d", in.length, offset));
+        }
+        if (in[offset] < 0) {
+            throw new IllegalArgumentException(String.format("too large: %d", in[offset]));
+        }
+        int i = in[offset] << 24;
+        i += pos(in[1 + offset]) << 16;
+        i += pos(in[2 + offset]) << 8;
+        i += pos(in[3 + offset]);
+        return i;
     }
+
+    /**
+     * Convert the signed byte to an unsigned number between 0x0 and 0xff.
+     * @param b the byte to convert
+     * @return the integer containing the positive value
+     */
+    private static int pos(byte b)
+    {
+        return b < 0 ? b + 0x100 : b;
+    }
+
 
     private static final String DEFAULT_CONTENT_TYPE = "image/jpeg";
     private static final int IMAGE_TYPE = 0x03;
