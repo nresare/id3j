@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jid3" default="dist">
-    <property name="version" value="0.1"/>
+    <property name="version" value="0.2"/>
 
     <target name="compile" >
         <mkdir dir="classes/production/${ant.project.name}"/>

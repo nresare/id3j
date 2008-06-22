@@ -1,15 +1,13 @@
 package com.voxbiblia.jid3;
 
-import junit.framework.TestCase;
-
 import java.io.*;
-import java.util.zip.GZIPInputStream;
+import java.util.Map;
 
 /**
  * Tests ID3Serializer
  */
 public class ID3SerializerTest
-    extends TestCase
+    extends TestBase
 {
     public void testSerialize()
     {
@@ -66,10 +64,28 @@ public class ID3SerializerTest
         t.setLyrics("€299");
         ID3Serializer s = new ID3Serializer();
         cmp(readFile("test/data/tag4.bin"), s.serialize(t));
-
-
-
     }
+
+    public void testGetOffsets()
+    {
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag4.bin"));
+        assertEquals(6, offsets.size());
+        assertEquals((Integer)0x0a, offsets.get("TRCK"));
+        assertEquals((Integer)0x19, offsets.get("TALB"));
+        assertEquals((Integer)0x38, offsets.get("COMM"));
+        assertEquals((Integer)0x6e, offsets.get("TPE1"));
+        assertEquals((Integer)0xb3, offsets.get("USLT"));
+    }
+
+    public void testGetOffsets2()
+    {
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag1.bin"));
+        assertEquals(3, offsets.size());
+        assertEquals((Integer)0x0a, offsets.get("TRCK"));
+        assertEquals((Integer)0x16, offsets.get("TALB"));
+        assertEquals((Integer)0x4d, offsets.get("TPE1"));
+    }
+
 
     public void testNeedsUnicode()
     {
@@ -106,64 +122,4 @@ public class ID3SerializerTest
         }
     }
 
-    private byte[] readFile(String filename)
-    {
-        try {
-            File f = new File(filename);
-            if (filename.endsWith(".gz")) {
-                FileInputStream fis = new FileInputStream(filename);
-                GZIPInputStream zis = new GZIPInputStream(fis);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buffer = new byte[8192];
-                int read = zis.read(buffer);
-                while (read > 0) {
-                    baos.write(buffer, 0, read);
-                    read = zis.read(buffer);
-                }
-                fis.close();
-                return baos.toByteArray();
-            }
-            FileInputStream fis = new FileInputStream(f);
-            int len = (int)f.length();
-            byte[] bs = new byte[(int)f.length()];
-            if (fis.read(bs) != len) {
-                throw new IOException("short read");
-            }
-            fis.close();
-            return bs;
-        } catch (IOException e) {
-            throw new Error(e);
-        }
-    }
-
-    private void cmp(byte[] a, byte[] b)
-    {
-        if (a == null || b == null) {
-
-            fail("neither a nor b can be null");
-        }
-        if (a.length != b.length) {
-            write(a, "reference.out");
-            write(b, "candidate.out");
-            fail("array length does not match: " + a.length + " vs " + b.length);
-        }
-        for (int i= 0; i < a.length; i++) {
-            if (a[i] != b[i] ) {
-                write(a, "reference.out");
-                write(b, "candidate.out");
-                fail("mismatch at byte 0x"+ Integer.toHexString(i));
-            }
-        }
-    }
-
-    private void write(byte[] a, String filename)
-    {
-        try {
-            FileOutputStream fos = new FileOutputStream(filename);
-            fos.write(a);
-            fos.close();
-        } catch (IOException e) {
-            throw new Error(e);
-        }
-    }
 }

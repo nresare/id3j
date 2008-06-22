@@ -53,6 +53,11 @@ class Buffer
         
     }
 
+    public void writeBytes(byte[] bytes, int offset, int length)
+    {
+        baos.write(bytes, offset, length);
+    }
+
 
     public void writeUInt32BE(int i)
     {
