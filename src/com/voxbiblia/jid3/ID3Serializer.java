@@ -106,8 +106,9 @@ public class ID3Serializer
         for (int i = 10; i < tag.length;) {
             String id;
             try {
-                if (i < 0) {
-                    throw new Error("meep");
+                if (tag[i] == 0 && tag[i+1] == 0 && tag[i+2] == 0
+                        && tag[i+3] == 0) {
+                    return m;
                 }
                 id = new String(tag, i, 4, "US-ASCII");
             } catch (UnsupportedEncodingException e) {
