@@ -63,7 +63,7 @@ public abstract class TestBase
         }
     }
 
-    private void write(byte[] a, String filename)
+    protected void write(byte[] a, String filename)
     {
         try {
             FileOutputStream fos = new FileOutputStream(filename);

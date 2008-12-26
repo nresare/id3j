@@ -3,6 +3,7 @@ package com.voxbiblia.jid3;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.CRC32;
 
 /**
  * Serializes ID3 data into a tag byte stream.
@@ -12,6 +13,7 @@ public class ID3Serializer
     private int padCount = 0;
 
     private static Map<String, String> properties = new HashMap<String, String>();
+
     static {
         properties.put("TRCK", "track");
         properties.put("APIC", "picture");
@@ -34,8 +36,32 @@ public class ID3Serializer
         return serialize(tag, null);
     }
 
+    /**
+     * Serializes the data in the given <tt>tag</tt> into the returned byte,
+     * copying any value that is not set in the tag from the serialized
+     * tag previous.  
+     *
+     * @param tag the data to write to the tag
+     * @param previous a previously serialized tag to extract default values from
+     * @return a serialized ID3-tag
+     */
+    public byte[] serialize(ID3Tag tag, byte[] previous)
+    {
+        return serialize(tag, previous, false);
+    }
 
-    byte[] serialize(ID3Tag tag, byte[] previous)
+    /**
+     * Serializes the data in the given <tt>tag</tt> into the returned byte,
+     * copying any value that is not set in the tag from the serialized
+     * tag previous. If compensateCrc is set to true the resulting tag contains
+     * data that makes it's CRC32 checksum match that of a zero-size byte array.
+     *
+     * @param tag the data to write to the tag
+     * @param previous a previously serialized tag to extract default values from
+     * @param compensateCrc if set to true the serialized tag is CRC32-neutral.
+     * @return a serialized ID3-tag
+     */
+    public byte[] serialize(ID3Tag tag, byte[] previous, boolean compensateCrc)
     {
         Buffer b = new Buffer();
         b.writeString("ID3");
@@ -44,20 +70,60 @@ public class ID3Serializer
         b.writeZeroes(6);
 
         Map<String, Integer> offsets = getOffsets(previous);
-        for (String frame : new String[] {"TRCK", "APIC", "TALB",
-                "COMM", "TPE1", "TIT2", "USLT"}) {
+        for (String frame : properties.keySet()) {
             handleFrame(b, frame, properties.get(frame), tag, offsets, previous);
-
         }
 
         if (padCount > 0) {
+            if (compensateCrc) {
+                throw new IllegalStateException("CRC compensation and padding" +
+                        " can not both be added, don't call setPadCount()");
+            }
             b.writeZeroes(padCount);
+        }
+
+        if (compensateCrc) {
+            writeCrcCompensationFrame(b);
         }
 
         byte[] bs = b.getBytes();
         writeTagSize(bs);
+        if (compensateCrc) {
+            fillInCompensationFrame(bs);
+        }
         return bs;
     }
+
+    private static final String COMP_FRAME_ID = "http://resare.com/crc32/tag";
+
+    /**
+     * Writes a blank CRC compensation tag of the right size.
+     * @param buffer the buffer to write the data to
+     */
+    private void writeCrcCompensationFrame(Buffer buffer)
+    {
+        buffer.writeString("PRIV");
+        buffer.writeUInt32BE(COMP_FRAME_ID.length() + 5);
+        buffer.writeString(COMP_FRAME_ID);
+        buffer.writeZeroes(5);
+    }
+
+    /**
+     * Replaces the four last bytes of the given byte array with the CRC32
+     * compensation value that makes the wole byte array crc neutral.
+     *
+     * @param bytes the bytes to checksum and update the tail of.
+     */
+    private void fillInCompensationFrame(byte[] bytes)
+    {
+        CRC32 c = new CRC32();
+        c.update(bytes, 0, bytes.length - 4);
+        byte[] update = CRC32Compensator.compensate((int)c.getValue(), 0);
+        System.arraycopy(update, 0, bytes, bytes.length - 4, 4);
+    }
+
+
+
 
     private void handleFrame(Buffer b, String frameId, String property,
                              ID3Tag t, Map<String, Integer> offsets,
@@ -103,23 +169,27 @@ public class ID3Serializer
         if (tag == null) {
             return m;
         }
-        for (int i = 10; i < tag.length;) {
-            String id;
-            try {
+        try {
+            for (int i = 10; i < tag.length;) {
+                String id;
+                if (i > tag.length - 4) {
+                    return m;
+                }
                 if (tag[i] == 0 && tag[i+1] == 0 && tag[i+2] == 0
                         && tag[i+3] == 0) {
                     return m;
                 }
                 id = new String(tag, i, 4, "US-ASCII");
-            } catch (UnsupportedEncodingException e) {
-                throw new Error(e);
+                m.put(id, i);
+                i += 4;
+                i += readUInt32BE(tag, i) + 6;
             }
-            m.put(id, i);
-            i += 4;
-            i += readUInt32BE(tag, i) + 6;
+        } catch (UnsupportedEncodingException e) {
+            throw new Error(e);
         }
         return m;
     }
+
 
     /**
      *
@@ -136,10 +206,13 @@ public class ID3Serializer
             throws IllegalArgumentException
     {
         if (in.length < offset + 4) {
-            throw new IllegalArgumentException(String.format("can't read from in with size %d offset %d", in.length, offset));
+            throw new IllegalArgumentException(
+                    String.format("can't read from in with size %d offset %d",
+                            in.length, offset));
         }
         if (in[offset] < 0) {
-            throw new IllegalArgumentException(String.format("too large: %d", in[offset]));
+            throw new IllegalArgumentException(String.format("too large: %d",
+                    in[offset]));
         }
         int i = in[offset] << 24;
         i += pos(in[1 + offset]) << 16;

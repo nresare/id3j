@@ -2,6 +2,7 @@ package com.voxbiblia.jid3;
 
 import java.io.*;
 import java.util.Map;
+import java.util.zip.CRC32;
 
 /**
  * Tests ID3Serializer
@@ -86,6 +87,24 @@ public class ID3SerializerTest
         assertEquals((Integer)0x4d, offsets.get("TPE1"));
     }
 
+    public void testGetOffsetsShortPadding()
+    {
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag6.bin"));
+        assertEquals(3, offsets.size());
+        assertEquals((Integer)0x0a, offsets.get("TRCK"));
+        assertEquals((Integer)0x16, offsets.get("TALB"));
+        assertEquals((Integer)0x4d, offsets.get("TPE1"));
+    }
+
+    public void testGetOffsetsNormalPadding()
+    {
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag7.bin"));
+        assertEquals(3, offsets.size());
+        assertEquals((Integer)0x0a, offsets.get("TRCK"));
+        assertEquals((Integer)0x16, offsets.get("TALB"));
+        assertEquals((Integer)0x4d, offsets.get("TPE1"));
+    }
+
 
     public void testNeedsUnicode()
     {
@@ -109,6 +128,22 @@ public class ID3SerializerTest
         assertEquals(65240, ID3Serializer.readUInt32BE(bs, 0));
     }
 
+    public void testCompensateCRC32()
+    {
+        CRC32 c = new CRC32();
+        ID3Serializer s = new ID3Serializer();
+        ID3Tag t = new ID3Tag();
+        t.setArtist("greger");
+        byte[] tag = s.serialize(t, null, true);
+        c.update(tag);
+        byte[] mp3 = readFile("test/data/short.mp3");
+        c.update(mp3);
+
+
+        CRC32 ref = new CRC32();
+        ref.update(mp3);
+        assertEquals(ref.getValue(), c.getValue());
+    }
 
     private String readTextFile(String filename)
     {
