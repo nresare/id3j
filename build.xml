@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jid3" default="dist">
-    <property name="version" value="0.4"/>
+    <property name="version" value="0.9"/>
 
     <target name="compile" >
         <mkdir dir="classes/production/${ant.project.name}"/>
@@ -10,7 +10,7 @@
         </javac>
     </target>
 
-    <target name="dist" depends="compile">
+    <target name="dist" depends="compile, javadoc">
         <mkdir dir="dist"/>
         <jar file="dist/${ant.project.name}-${version}.jar">
             <fileset dir="classes/production/${ant.project.name}"/>
@@ -21,11 +21,15 @@
         <tar tarfile="dist/${ant.project.name}-${version}-test.tar.bz2" compression="bzip2" basedir=".">
             <include name="test/**"/>
         </tar>
+        <tar tarfile="dist/${ant.project.name}-${version}-javadoc.tar.bz2" compression="bzip2" basedir=".">
+            <include name="javadoc/**"/>
+        </tar>
         <zip file="dist/${ant.project.name}-${version}.zip">
             <zipfileset dir="." prefix="${ant.project.name}-${version}">
                 <exclude name="classes/**"/>
                 <exclude name="dist/**"/>
                 <exclude name="src/**"/>
+                <exclude name="javadoc/**"/>
                 <exclude name="test/**"/>
                 <exclude name="candidate.out"/>
                 <exclude name="reference.out"/>
@@ -43,6 +47,15 @@
         <delete dir="dist"/>
         <delete file="candidate.out"/>
         <delete file="reference.out"/>
+        <delete dir="javadoc"/>
+    </target>
+
+    <target name="javadoc">
+        <javadoc sourcepath="src" destdir="javadoc"
+            overview="src/package.html" packagenames="com.voxbiblia.jid3"
+            windowtitle="${ant.project.name} javadoc">
+            <link href="http://java.sun.com/javase/6/docs/api/"/>
+        </javadoc>
     </target>
 
 </project>
