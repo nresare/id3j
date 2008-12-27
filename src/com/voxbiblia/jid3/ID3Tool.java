@@ -19,8 +19,6 @@
  */
 package com.voxbiblia.jid3;
 
-import java.io.File;
-
 /**
  * A tool class used to serialize audio metadata for inclusion into an
  * ID3 tag. 
@@ -39,31 +37,6 @@ public class ID3Tool
     {
         ID3Serializer s = new ID3Serializer();
         return s.serialize(updatedValues, existing);
-    }
-
-    /**
-     * Converts the given tag instance to an ID3v2.3 byte stream
-     * and adds it to the target, replacing any existing tag.
-     *
-     * @param tag the tag to write
-     * @param target the file to write it to
-     */
-    public static void write(File target, ID3Tag tag)
-    {
-        throw new Error("not implemented");
-    }
-
-    /**
-     * Updates the ID3 tag in target with new values from tag. If a property
-     * in tag is not set, the corresponding frame is copied from the previous
-     * tag.
-     *
-     * @param target the file to update the ID3 tag in
-     * @param tag an ID3Tag instance that contains updated properties
-     */
-    public static void update(File target, ID3Tag tag)
-    {
-        throw new Error("not implemented");
     }
 
     /**

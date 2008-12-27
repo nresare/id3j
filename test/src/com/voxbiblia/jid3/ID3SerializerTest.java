@@ -123,8 +123,7 @@ public class ID3SerializerTest
         assertEquals((Integer)0x16, offsets.get("TALB"));
         assertEquals((Integer)0x4d, offsets.get("TPE1"));
     }
-
-
+    
     public void testNeedsUnicode()
     {
         assertTrue(ID3Serializer.needsUnicode("€100"));
@@ -147,6 +146,17 @@ public class ID3SerializerTest
         assertEquals(65240, ID3Serializer.readUInt32BE(bs, 0));
     }
 
+    public void testPropagateUnknownTag()
+    {
+        byte[] oldTag = readFile("test/data/wild.bin.gz");
+        ID3Tag t = new ID3Tag();
+        t.setTitle("meep");
+        byte[] newTag = new ID3Serializer().serialize(t, oldTag);
+        assertTrue("Could not find TYER frame",
+                ArrayTool.indexOf(ArrayTool.bs("TYER"), newTag) > -1);
+        write(newTag, "tag.bin");
+    }
+
     public void testCompensateCRC32()
     {
         CRC32 c = new CRC32();
@@ -157,7 +167,6 @@ public class ID3SerializerTest
         c.update(tag);
         byte[] mp3 = readFile("test/data/short.mp3");
         c.update(mp3);
-
 
         CRC32 ref = new CRC32();
         ref.update(mp3);

@@ -57,10 +57,8 @@ public class ID3Serializer
     }
 
     /**
-     * Serializes the data in the given <tt>tag</tt> into the returned byte,
-     * copying any value that is not set in the tag from the serialized
-     * tag previous.  
-     *
+     * Copies the frames from the tag previous, replacing any frames which are
+     * set in tag.
      * @param tag the data to write to the tag
      * @param previous a previously serialized tag to extract default values from
      * @return a serialized ID3-tag
@@ -71,9 +69,8 @@ public class ID3Serializer
     }
 
     /**
-     * Serializes the data in the given <tt>tag</tt> into the returned byte,
-     * copying any value that is not set in the tag from the serialized
-     * tag previous. If compensateCrc is set to true the resulting tag contains
+     * Copies the frames from the tag previous, replacing any frames which are
+     * set in tag. If compensateCrc is set to true the resulting tag contains
      * data that makes it's CRC32 checksum match that of a zero-size byte array.
      *
      * @param tag the data to write to the tag
@@ -89,9 +86,26 @@ public class ID3Serializer
         // we write zero length for now, length field will be updated later
         b.writeZeroes(6);
 
+        Map<String, Boolean> used = new HashMap<String, Boolean>();
         Map<String, Integer> offsets = getOffsets(previous);
-        for (String frame : properties.keySet()) {
-            handleFrame(b, frame, properties.get(frame), tag, offsets, previous);
+
+        for (String frameId : offsets.keySet()) {
+            if (Boolean.TRUE.equals(used.get(frameId))) {
+                continue;
+            }
+            boolean u = handleFrame(b, frameId, properties.get(frameId),
+                    tag, offsets, previous);
+            if (u) {
+                used.put(frameId, true);
+            }
+        }
+
+        for (String frameId : properties.keySet()) {
+            if (Boolean.TRUE.equals(used.get(frameId))) {
+                continue;
+            }
+            handleFrame(b, frameId, properties.get(frameId),
+                    tag, null, null);
         }
 
         if (padCount > 0) {
@@ -142,16 +156,20 @@ public class ID3Serializer
         System.arraycopy(update, 0, bytes, bytes.length - 4, 4);
     }
 
-    private void handleFrame(Buffer b, String frameId, String property,
+    // returns true if a value from tag was used, else false
+    private boolean handleFrame(Buffer b, String frameId, String property,
                              ID3Tag t, Map<String, Integer> offsets,
                              byte[] previous)
     {
-        Object tagProperty = BeanTool.getProperty(t, property);
+        Object tagProperty = null;
+        if (property != null) {
+            tagProperty = BeanTool.getProperty(t, property);
+        }
         if (tagProperty == null) {
             if (offsets != null && offsets.containsKey(frameId)) {
                 copyFrame(b, previous, offsets.get(frameId));
             }
-            return;
+            return false;
         }
 
         if (frameId.equals("APIC")) {
@@ -161,6 +179,7 @@ public class ID3Serializer
         } else {
             writeText(b, frameId, (String)tagProperty);
         }
+        return true;
     }
 
     private void copyFrame(Buffer b, byte[] previous, int offset)
