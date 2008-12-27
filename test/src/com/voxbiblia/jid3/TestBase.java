@@ -92,4 +92,20 @@ public abstract class TestBase
             throw new Error(e);
         }
     }
+
+    protected void copyFile(String from, String to)
+    {
+        try {
+            byte[] bs = readFile(from);
+            File f = new File(to);
+            if (f.exists()) {
+                throw new Error("refusing to overwrite existing file " + to);
+            }
+            FileOutputStream fis = new FileOutputStream(f);
+            fis.write(bs);
+            fis.close();
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
 }

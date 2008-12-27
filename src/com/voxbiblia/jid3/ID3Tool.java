@@ -19,6 +19,11 @@
  */
 package com.voxbiblia.jid3;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * A tool class used to serialize audio metadata for inclusion into an
  * ID3 tag. 
@@ -39,6 +44,56 @@ public class ID3Tool
         return s.serialize(updatedValues, existing);
     }
 
+    /**
+     * Converts the given tag instance to an ID3v2.3 byte stream
+     * and adds it to the target, replacing any existing tag.
+     *
+     * @param tag the tag to write
+     * @param target the file to write it to
+     */
+    public static void writeToFile(File target, ID3Tag tag)
+    {
+        byte[] tagData = new ID3Serializer().serialize(tag);
+        File tmp = new File(target.getPath() + "_TEMP");
+        if (tmp.exists()) {
+            throw new Error("Could not create temp file" + tmp.getPath());
+        }
+        byte[] header = new byte[10];
+        try {
+            FileInputStream fis = new FileInputStream(target);
+            int read = fis.read(header);
+            if (read < header.length) {
+                throw new Error(String.format("Target file '%s' is shorter " +
+                        "than 10 bytes and probably corrupted",
+                        target.getPath()));
+            }
+            FileOutputStream fos = new FileOutputStream(tmp);
+            fos.write(tagData);
+            if (header[0] == 'I' && header[1] == 'D' && header[2] == '3') {
+                int tagLength = getTagLength(header);
+                if (fis.skip(tagLength) < tagLength) {
+                    throw new Error("failed to skip all of ID3 tag");
+                }
+            } else {
+                fos.write(header);
+            }
+            byte[] buf = new byte[8192];
+            read = fis.read(buf);
+            while (read > 0) {
+                fos.write(buf, 0, read);
+                read = fis.read(buf);
+            }
+            fos.close();
+            fis.close();
+            if (!tmp.renameTo(target)){
+                throw new Error(String.format("File rename from '%s' to " +
+                        "'%s' failed", tmp, target));
+            }
+        } catch (IOException e) {
+            throw new Error(e);
+        }
+    }
+    
     /**
      * Parses the tag header (the first 10 bytes of the ID3v2 tag) and
      * returns the length of the tag in bytes, excluding the header.

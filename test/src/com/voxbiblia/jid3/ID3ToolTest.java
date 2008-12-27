@@ -19,6 +19,10 @@
  */
 package com.voxbiblia.jid3;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+
 /**
  * Tests ID3Tool
  */
@@ -40,6 +44,71 @@ public class ID3ToolTest
         t.setAlbum("bar");
         t.setTrack("18");
         ID3Tool.merge(readFile("test/data/tag5.bin.gz"), t);
+    }
+
+    public void testWriteToFile()
+            throws Exception
+    {
+        String TEMP_FILE = "test/data/temp.mp3";
+        byte[] tag = readFile("test/data/tag1.bin");
+        byte[] mp3 = readFile("test/data/short.mp3");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(tag.length +
+                mp3.length);
+        baos.write(tag);
+        baos.write(mp3);
+
+        copyFile("test/data/short.mp3", TEMP_FILE);
+
+        ID3Tag t = new ID3Tag();
+        t.setArtist("Leffe");
+        t.setAlbum("Yngve ”steen“ Nilsson");
+        t.setTrack("8");
+
+        ID3Tool.writeToFile(new File(TEMP_FILE), t);
+
+        byte[] result = readFile(TEMP_FILE);
+
+        cmp(baos.toByteArray(), result);
+
+        assertTrue(new File(TEMP_FILE).delete());
+
+    }
+
+    public void testWriteReplacingTag()
+            throws Exception
+    {
+        String TEMP_FILE = "test/data/temp.mp3";
+        byte[] tag = readFile("test/data/minimal.bin");
+        byte[] mp3 = readFile("test/data/short.mp3");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(tag.length +
+                mp3.length);
+        baos.write(tag);
+        baos.write(mp3);
+
+        FileOutputStream combined = new FileOutputStream(
+                TEMP_FILE);
+        combined.write(baos.toByteArray());
+        combined.close();
+
+        ID3Tag t = new ID3Tag();
+        t.setArtist("Leffe");
+        t.setAlbum("Yngve ”steen“ Nilsson");
+        t.setTrack("8");
+
+        ID3Tool.writeToFile(new File(TEMP_FILE), t);
+
+        byte[] result = readFile(TEMP_FILE);
+
+        tag = readFile("test/data/tag1.bin");
+        baos = new ByteArrayOutputStream(tag.length +
+                mp3.length);
+        baos.write(tag);
+        baos.write(mp3);
+        cmp(baos.toByteArray(), result);
+
+        assertTrue(new File(TEMP_FILE).delete());
     }
 
 
