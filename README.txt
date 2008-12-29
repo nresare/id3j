@@ -1,5 +1,5 @@
-jid3 - A small library for generating ID3 metatdata for MP3 files
-Project web page: http://fs.voxbiblia.com/jid3/
+id3j - A small library for generating ID3 metatdata for MP3 files
+Project web page: http://fs.voxbiblia.com/id3j/
 
 This is a lightweight and easy to use library to create and add ID3 metadata
 tags to MP3-files. It only concerns itself with ID3 version 3.2.0 and only
@@ -45,10 +45,10 @@ The basic use case looks like this
   ID3Tool.writeToFile(new File("so_real.mp3"), tag);
 
 For further details, please see the JavaDoc documentation available at 
-http://fs.voxbiblia.com/jid3/javadoc/
+http://fs.voxbiblia.com/id3j/javadoc/
 
 If you want to build and test the software you need to unpack the files
-named jid3-*-src.tar.bz2 and jid3-*-test.tar.bz2 and use Apache Ant
+named id3j-*-src.tar.bz2 and id3j-*-test.tar.bz2 and use Apache Ant
 with the build.xml file that is included.
 
 Credits

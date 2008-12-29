@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="jid3" default="dist">
+<project name="id3j" default="dist">
     <property name="version" value="0.9"/>
 
     <target name="compile" >
@@ -52,7 +52,7 @@
 
     <target name="javadoc">
         <javadoc sourcepath="src" destdir="javadoc"
-            overview="src/package.html" packagenames="com.voxbiblia.jid3"
+            overview="src/package.html" packagenames="com.voxbiblia.id3j"
             windowtitle="${ant.project.name} javadoc">
             <link href="http://java.sun.com/javase/6/docs/api/"/>
         </javadoc>

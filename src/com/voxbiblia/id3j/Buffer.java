@@ -1,5 +1,5 @@
 /*
-    jid3 - a library that generates ID3v2 tags
+    id3j - a library that generates ID3v2 tags
     Copyright (C) 2008  Noa Resare (noa@voxbiblia.com)
 
     This program is free software: you can redistribute it and/or modify
@@ -15,9 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    Project web page: http://fs.voxbiblia.com/jid3/
+    Project web page: http://fs.voxbiblia.com/id3j/
  */
-package com.voxbiblia.jid3;
+package com.voxbiblia.id3j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

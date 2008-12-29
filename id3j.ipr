@@ -61,7 +61,9 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
     <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
-  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" />
+  <component name="Encoding" useUTFGuessing="false" native2AsciiForPropertiesFiles="false" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
@@ -232,12 +234,12 @@
     </group>
   </component>
   <component name="ProjectDetails">
-    <option name="projectName" value="jid3" />
+    <option name="projectName" value="id3j" />
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/jid3.iml" filepath="$PROJECT_DIR$/jid3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/id3j.iml" filepath="$PROJECT_DIR$/id3j.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="current" project-jdk-type="JavaSDK">
@@ -263,26 +265,6 @@
         <entry key="$PROJECT_DIR$">
           <value>
             <SvnBranchConfiguration>
-              <option name="branchMap">
-                <map>
-                  <entry key="svn+ssh://svn.complicata.se/srv/svnroot/jid3/tags">
-                    <value>
-                      <list>
-                        <SvnBranchItem>
-                          <option name="creationDateMillis" value="1214171177054" />
-                          <option name="revision" value="1241" />
-                          <option name="url" value="svn+ssh://svn.complicata.se/srv/svnroot/jid3/tags/rel_0.4" />
-                        </SvnBranchItem>
-                        <SvnBranchItem>
-                          <option name="creationDateMillis" value="1214159430924" />
-                          <option name="revision" value="1238" />
-                          <option name="url" value="svn+ssh://svn.complicata.se/srv/svnroot/jid3/tags/rel_0.2" />
-                        </SvnBranchItem>
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
               <option name="branchUrls">
                 <list>
                   <option value="svn+ssh://svn.complicata.se/srv/svnroot/jid3/tags" />

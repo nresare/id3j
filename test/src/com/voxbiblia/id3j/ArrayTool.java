@@ -1,4 +1,4 @@
-package com.voxbiblia.jid3;
+package com.voxbiblia.id3j;
 
 import java.io.UnsupportedEncodingException;
 
