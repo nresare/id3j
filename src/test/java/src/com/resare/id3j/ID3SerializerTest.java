@@ -34,7 +34,7 @@ public class ID3SerializerTest
         ID3Tag t = new ID3Tag();
         t.setAlbum("Omnibus");
         ID3Serializer s = new ID3Serializer();
-        cmp(readFile("test/data/minimal.bin"), s.serialize(t));
+        cmp(readFile("src/test/data/minimal.bin"), s.serialize(t));
     }
 
     public void testSerialize1()
@@ -44,7 +44,7 @@ public class ID3SerializerTest
         t.setAlbum("Yngve ”steen“ Nilsson");
         t.setTrack("8");
         ID3Serializer s = new ID3Serializer();
-        cmp(readFile("test/data/tag1.bin"), s.serialize(t));
+        cmp(readFile("src/test/data/tag1.bin"), s.serialize(t));
     }
 
     public void testSerialize2()
@@ -54,7 +54,7 @@ public class ID3SerializerTest
         t.setTitle("stolpe");
         ID3Serializer s = new ID3Serializer();
         s.setPadCount(1500);
-        cmp(readFile("test/data/tag2.bin.gz"), s.serialize(t));
+        cmp(readFile("src/test/data/tag2.bin.gz"), s.serialize(t));
     }
 
     public void testSerialize3()
@@ -63,13 +63,13 @@ public class ID3SerializerTest
         t.setArtist("Bibel 2000");
         t.setAlbum("40 Matteusevangeliet");
         t.setTrack("1/28");
-        t.setPicture(readFile("test/data/mt.png"));
+        t.setPicture(readFile("src/test/data/mt.png"));
         t.setTitle("Matt 01 Jesu släkttavla, Jesu födelse");
         t.setGenre("Nya Testamentet");
         t.setComment("www.voxbiblia.se\nInläsare: Mats Sundman");
-        t.setLyrics(readTextFile("test/data/lyrics.txt"));
+        t.setLyrics(readTextFile("src/test/data/lyrics.txt"));
         ID3Serializer s = new ID3Serializer();
-        cmp(readFile("test/data/tag3.bin"), s.serialize(t));
+        cmp(readFile("src/test/data/tag3.bin"), s.serialize(t));
     }
 
     public void testSerializeUnicodeLyrics()
@@ -83,12 +83,12 @@ public class ID3SerializerTest
         t.setComment("www.voxbiblia.se\nInläsare: Mats Sundman");
         t.setLyrics("€299");
         ID3Serializer s = new ID3Serializer();
-        cmp(readFile("test/data/tag4.bin"), s.serialize(t));
+        cmp(readFile("src/test/data/tag4.bin"), s.serialize(t));
     }
 
     public void testGetOffsets()
     {
-        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag4.bin"));
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("src/test/data/tag4.bin"));
         assertEquals(6, offsets.size());
         assertEquals((Integer)0x0a, offsets.get("TRCK"));
         assertEquals((Integer)0x19, offsets.get("TALB"));
@@ -99,7 +99,7 @@ public class ID3SerializerTest
 
     public void testGetOffsets2()
     {
-        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag1.bin"));
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("src/test/data/tag1.bin"));
         assertEquals(3, offsets.size());
         assertEquals((Integer)0x0a, offsets.get("TRCK"));
         assertEquals((Integer)0x16, offsets.get("TALB"));
@@ -108,7 +108,7 @@ public class ID3SerializerTest
 
     public void testGetOffsetsShortPadding()
     {
-        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag6.bin"));
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("src/test/data/tag6.bin"));
         assertEquals(3, offsets.size());
         assertEquals((Integer)0x0a, offsets.get("TRCK"));
         assertEquals((Integer)0x16, offsets.get("TALB"));
@@ -117,7 +117,7 @@ public class ID3SerializerTest
 
     public void testGetOffsetsNormalPadding()
     {
-        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("test/data/tag7.bin"));
+        Map<String, Integer> offsets = ID3Serializer.getOffsets(readFile("src/test/data/tag7.bin"));
         assertEquals(3, offsets.size());
         assertEquals((Integer)0x0a, offsets.get("TRCK"));
         assertEquals((Integer)0x16, offsets.get("TALB"));
@@ -148,7 +148,7 @@ public class ID3SerializerTest
 
     public void testPropagateUnknownTag() throws IOException
     {
-        byte[] oldTag = readFile("test/data/wild.bin.gz");
+        byte[] oldTag = readFile("src/test/data/wild.bin.gz");
         ID3Tag t = new ID3Tag();
         t.setTitle("meep");
         byte[] newTag = new ID3Serializer().serialize(t, oldTag);
@@ -167,7 +167,7 @@ public class ID3SerializerTest
         t.setArtist("greger");
         byte[] tag = s.serialize(t, null, true);
         c.update(tag);
-        byte[] mp3 = readFile("test/data/short.mp3");
+        byte[] mp3 = readFile("src/test/data/short.mp3");
         c.update(mp3);
 
         CRC32 ref = new CRC32();

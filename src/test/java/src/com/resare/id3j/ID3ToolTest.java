@@ -31,11 +31,11 @@ public class ID3ToolTest
 {
     public void testMerge()
     {
-        byte[] b = readFile("test/data/tag4.bin");
+        byte[] b = readFile("src/test/data/tag4.bin");
         ID3Tag t = new ID3Tag();
         t.setTitle("Greeger");
         byte[] another = ID3Tool.merge(b, t);
-        cmp(readFile("test/data/tag4_modified_title.bin"), another);
+        cmp(readFile("src/test/data/tag4_modified_title.bin"), another);
     }
 
     public void testMerge2()
@@ -43,22 +43,22 @@ public class ID3ToolTest
         ID3Tag t = new ID3Tag();
         t.setAlbum("bar");
         t.setTrack("18");
-        ID3Tool.merge(readFile("test/data/tag5.bin.gz"), t);
+        ID3Tool.merge(readFile("src/test/data/tag5.bin.gz"), t);
     }
 
     public void testWriteToFile()
             throws Exception
     {
-        String TEMP_FILE = "test/data/temp.mp3";
-        byte[] tag = readFile("test/data/tag1.bin");
-        byte[] mp3 = readFile("test/data/short.mp3");
+        String TEMP_FILE = "src/test/data/temp.mp3";
+        byte[] tag = readFile("src/test/data/tag1.bin");
+        byte[] mp3 = readFile("src/test/data/short.mp3");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(tag.length +
                 mp3.length);
         baos.write(tag);
         baos.write(mp3);
 
-        copyFile("test/data/short.mp3", TEMP_FILE);
+        copyFile("src/test/data/short.mp3", TEMP_FILE);
 
         ID3Tag t = new ID3Tag();
         t.setArtist("Leffe");
@@ -78,9 +78,9 @@ public class ID3ToolTest
     public void testWriteReplacingTag()
             throws Exception
     {
-        String TEMP_FILE = "test/data/temp.mp3";
-        byte[] tag = readFile("test/data/minimal.bin");
-        byte[] mp3 = readFile("test/data/short.mp3");
+        String TEMP_FILE = "src/test/data/temp.mp3";
+        byte[] tag = readFile("src/test/data/minimal.bin");
+        byte[] mp3 = readFile("src/test/data/short.mp3");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream(tag.length +
                 mp3.length);
@@ -101,7 +101,7 @@ public class ID3ToolTest
 
         byte[] result = readFile(TEMP_FILE);
 
-        tag = readFile("test/data/tag1.bin");
+        tag = readFile("src/test/data/tag1.bin");
         baos = new ByteArrayOutputStream(tag.length +
                 mp3.length);
         baos.write(tag);
