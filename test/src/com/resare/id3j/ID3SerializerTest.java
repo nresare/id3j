@@ -154,7 +154,9 @@ public class ID3SerializerTest
         byte[] newTag = new ID3Serializer().serialize(t, oldTag);
         assertTrue("Could not find TYER frame",
                 ArrayTool.indexOf(ArrayTool.bs("TYER"), newTag) > -1);
-        write(newTag, "tag.bin");
+        File f = File.createTempFile("id3j", null);
+        write(newTag, f.getAbsolutePath());
+        f.delete();
     }
 
     public void testCompensateCRC32()
