@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.resare.id3j</groupId>
     <artifactId>id3j</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>id3j</name>
     <description>A library that reads and writes ID3 metadata from and to MP3 files.</description>
@@ -16,7 +16,6 @@
     <scm>
         <connection>scm:git:https://github.com/noaresare/id3j</connection>
         <url>https://github.com/noaresare/id3j</url>
-        <tag>v0.9.1</tag>
     </scm>
     <developers>
         <developer>
