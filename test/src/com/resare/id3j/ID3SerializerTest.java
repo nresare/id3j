@@ -17,7 +17,7 @@
 
     Project web page: http://fs.voxbiblia.com/id3j/
  */
-package com.voxbiblia.id3j;
+package com.resare.id3j;
 
 import java.io.*;
 import java.util.Map;
@@ -146,7 +146,7 @@ public class ID3SerializerTest
         assertEquals(65240, ID3Serializer.readUInt32BE(bs, 0));
     }
 
-    public void testPropagateUnknownTag()
+    public void testPropagateUnknownTag() throws IOException
     {
         byte[] oldTag = readFile("test/data/wild.bin.gz");
         ID3Tag t = new ID3Tag();

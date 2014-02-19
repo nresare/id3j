@@ -52,7 +52,7 @@
 
     <target name="javadoc">
         <javadoc sourcepath="src" destdir="javadoc"
-            overview="src/package.html" packagenames="com.voxbiblia.id3j"
+            overview="src/package.html" packagenames="com.resare.id3j"
             windowtitle="${ant.project.name} javadoc">
             <link href="http://java.sun.com/javase/6/docs/api/"/>
         </javadoc>

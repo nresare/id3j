@@ -17,7 +17,7 @@
 
     Project web page: http://fs.voxbiblia.com/id3j/
  */
-package com.voxbiblia.id3j;
+package com.resare.id3j;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
