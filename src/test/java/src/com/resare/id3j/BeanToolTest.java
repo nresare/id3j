@@ -34,7 +34,25 @@ public class BeanToolTest
         assertEquals("foobar", BeanTool.getProperty(t, "title"));
     }
 
-    public class Bean
+    public void testGetNonexistant()
+    {
+        try {
+            BeanTool.getProperty(new Object(), "something");
+            fail("Should have thrown RuntimeException");
+        } catch (RuntimeException e) {
+            // pass
+        }
+
+        try {
+            BeanTool.getProperty(new Bean(), "c");
+            fail("Should have thrown Error");
+        } catch (Error e) {
+            //
+        }
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static class Bean
     {
         private String a, b, foo;
 
@@ -67,15 +85,22 @@ public class BeanToolTest
         {
             this.foo = foo;
         }
+
+        public static String getC() { throw new RuntimeException(); }
     }
 
     public void testGetProperties()
     {
         Set<String> props = BeanTool.getProperties(new Bean());
-        assertEquals(3, props.size());
+        assertEquals(4, props.size());
         assertTrue(props.contains("foo"));
         assertTrue(props.contains("a"));
         assertTrue(props.contains("b"));
     }
 
+    public void testCreateSingleton()
+    {
+        new BeanTool();
+        new BeanTool.BeanProxy(String.class);
+    }
 }

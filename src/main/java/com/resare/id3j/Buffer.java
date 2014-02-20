@@ -27,7 +27,18 @@ import java.io.IOException;
  */
 class Buffer
 {
-    private ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    private ByteArrayOutputStream baos;
+
+    public Buffer()
+    {
+        baos = new ByteArrayOutputStream();
+    }
+
+    Buffer(ByteArrayOutputStream outputStream)
+    {
+        baos = outputStream;
+    }
+
 
     /**
      * Writes a number of zero bytes to the buffer
@@ -95,7 +106,7 @@ class Buffer
 
     public int getSize()
     {
-        return baos.toByteArray().length;
+        return baos.size();
     }
 
     public byte[] getBytes()

@@ -44,7 +44,19 @@ public class CRC32CompensatorTest
         return ~crc;
     }
 
+    public void testCompensateFail() {
+        byte[] data = "greger".getBytes();
+        //noinspection PrimitiveArrayArgumentToVariableArgMethod
+        long someChecksum = getCRC32(data);
+        try {
+            CRC32Compensator.compensate((int)someChecksum, -0x2e);
+            fail("Should have thrown error, no crc32 can have lowest byte -0x2e");
+        } catch (Error e) {
+            // pass
+        }
 
+
+    }
 
     public void testCompensate()
             throws Exception

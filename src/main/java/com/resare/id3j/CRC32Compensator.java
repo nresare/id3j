@@ -156,7 +156,7 @@ public class CRC32Compensator
         return i >>> (which * 8) & 0xff;
     }
 
-    private static int getIndexByHighByte(int b)
+    static int getIndexByHighByte(int b)
     {
         b = b < 0 ? b + 0x100 : b;
         for (int i = 0; i < 0xff; i++) {
