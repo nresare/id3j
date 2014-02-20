@@ -15,6 +15,7 @@
     </licenses>
     <scm>
         <connection>scm:git:https://github.com/noaresare/id3j</connection>
+        <developerConnection>scm:git:https://github.com/noaresare/id3j</developerConnection>
         <url>https://github.com/noaresare/id3j</url>
     </scm>
     <developers>
